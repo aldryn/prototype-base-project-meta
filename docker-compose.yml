@@ -1,0 +1,36 @@
+base:
+    build: base-docker
+
+baseproject:
+    build: base-project
+
+baseprojectonbuild:
+    build: base-project
+    dockerfile: Dockerfile.onbuild
+
+projecttemplate:
+    build: project-template
+    volumes:
+        - project-template:/app
+        - .pip-cache:/var/cache/pip
+    environment:
+        VIRTUAL_HOST: tpl.local.aldryn.net
+
+wheels:
+    image: minimal_baseproject
+    volumes:
+        - .pip-cache:/var/cache/pip
+        - requirements.txt:/usr/src/app/requirements.txt
+    working_dir: /usr/src/app
+    command: pip wheel --find-links=/var/cache/pip --wheel-dir=/var/cache/pip --no-deps -r requirements.txt
+
+mypypi:
+  image: python:2.7.10
+  volumes:
+    - ".pip-cache:/usr/src/app"
+  working_dir: /usr/src/app
+  command: python -m SimpleHTTPServer 8000
+  expose:
+      - "8000"
+  environment:
+    VIRTUAL_HOST: mypypi.local.aldryn.net
